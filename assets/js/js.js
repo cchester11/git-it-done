@@ -20,7 +20,7 @@ var formSubmitHandler = function(event) {
   console.log(event);
 };
 
-var displayRepos = function(repos, serachTerm) {
+var displayRepos = function(repos, searchTerm) {
   console.log(repos);
   console.log(searchTerm);
 };
@@ -33,10 +33,9 @@ var getUserRepos = function(x) {
 
   // make a request to the url
   fetch(apiUrl).then(function(response) {
-    return response.json()
-  }).then(function(data) {
-      console.log(data);
-  });
-};
+    response.json().then(function(data) {
+      displayRepos(data, user);
+    });
+});
 
 userFormEl.addEventListener('submit', formSubmitHandler);
