@@ -34,8 +34,9 @@ var getUserRepos = function(x) {
   // make a request to the url
   fetch(apiUrl).then(function(response) {
     response.json().then(function(data) {
-      displayRepos(data, user);
-    });
+      displayRepos(data, user)
+    })
 });
+}
 
 userFormEl.addEventListener('submit', formSubmitHandler);
