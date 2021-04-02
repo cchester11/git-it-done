@@ -1,42 +1,103 @@
 var userFormEl = document.querySelector('#user-form');
 var nameInputEl = document.querySelector('#username');
 
+var repoContainerEl = document.getElementById('repos-container');
+var reposSearchTerm = document.getElementById('repo-search-term');
+
+//repos and search term are acting as a, b parameters
+//this function allows for any two variables to logged
+var displayRepos = function(repos, searchTerm) {
+  //check for repos 
+  if (repos.length === 0) {
+    repoContainerEl.textContent = "No repositories found.";
+    return;
+  }
+
+  //console log the data
+  console.log(repos);
+  console.log(searchTerm);
+
+  //clear old content
+  repoContainerEl.textContent = "";
+  reposSearchTerm.textContent = searchTerm;
+
+  //loop over repos
+  for (var i = 0; i < repos.length; i++) {
+    //format repo name
+    var repoName = repos[i].owner.login + "/" + repos[i].name;
+
+    //create a container for each repo
+    var repoEl = document.createElement('div');
+    //method classList allows you to apply classes to the element youre selecting
+    repoEl.classList = "list-item flex-row justify-space-between align-content";
+
+    // create a span element to hold repository name
+    var titleEl = document.createElement('span');
+    titleEl.textContent = repoName;
+
+    //append the span to container
+    repoEl.appendChild(titleEl);
+
+    //create a status element
+    var statusEl = document.createElement('span');
+    statusEl.classList = "flex-row align-center";
+
+    //check if current repo has issues 
+    if(repos[i].open_issues_count > 0) {
+      statusEl.innerHTML = "<i class='fas fa-times status-icon icon-danger'></i>" + repos[i].open_issues_count + " issues";
+    } else {
+      statusEl.innerHTML = "<i class='fas fa-check-square status-icon icon-success'></i>";
+    }
+
+    repoEl.appendChild(statusEl);
+
+    //now append the container to the dom
+    repoContainerEl.appendChild(repoEl);
+    
+  }
+    
+};
+
+//displayRepos function is thrown into getUserRepos to log specific data when the api is fetched
+var getUserRepos = function(user) {
+  // format the github api url
+  var apiUrl = "https://api.github.com/users/" + user + "/repos";
+
+  // make a get request to url
+  fetch(apiUrl).then(function(response) {
+    //.ok is a boolean. so if the response is true (the input has a valid value) the if statement will execute
+    if (response.ok) {
+      response.json()
+      .then(function(data) {
+        displayRepos(data, user);
+      })
+    } else {
+      alert('Error: ' + response.statusText);
+    }
+  })
+  .catch(function(error) {
+    //notice the .catch method is chained to the .then method
+    alert('unable to connect to GitHub')
+  })
+};
+
 var formSubmitHandler = function(event) {
 
   event.preventDefault();
 
-  //get value from input element
   var username = nameInputEl.value.trim();
 
-  if(username) {
-    //use getUserRepos to find the name
+  if (username) {
+    //the value of the input replaces the parameter of getUserRepos
     getUserRepos(username);
-    //empty out the input element
-    nameInputEl.value = '';
+    //empty the input element
+    nameInputEl.value = "";
   } else {
-    alert('Please enter a Github Username')
+    alert('Please enter a Github username');
   }
-  //log to ensure functionality
+
   console.log(event);
-};
-
-var displayRepos = function(repos, searchTerm) {
-  console.log(repos);
-  console.log(searchTerm);
-};
-
-//created a paremeter of x to be replaced by whatever information we need to fetch
-var getUserRepos = function(x) {
-  // format the github api url
-  //var user is being plugged into the blank users/{user}/repos as a string to be read
-  var apiUrl = "https://api.github.com/users/" + x + "/repos";
-
-  // make a request to the url
-  fetch(apiUrl).then(function(response) {
-    response.json().then(function(data) {
-      displayRepos(data, user)
-    })
-});
 }
+
 
 userFormEl.addEventListener('submit', formSubmitHandler);
